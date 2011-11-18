@@ -13,6 +13,7 @@ Features
 * add Host.prototype.getContainer. Take an options params that may container either hostname or id
 * update ressources/vzinfo.py to work with  Host.prototype.getContainer
 * add Host.prototype.getVzinfo
+* auto add container id at the beginning of hostname
 
 Bug fixes
 
