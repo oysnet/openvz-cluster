@@ -8,6 +8,8 @@ Features
 * add container gitolite to manage repositories
 * add user key management, repository management, group management on container gitolite
 * add this file
+* container type come with type static attribute
+* Host.prototype.register user type static container attribute
 
 Bug fixes
 
