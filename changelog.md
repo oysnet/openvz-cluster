@@ -14,6 +14,9 @@ Features
 * update ressources/vzinfo.py to work with  Host.prototype.getContainer
 * add Host.prototype.getVzinfo
 * auto add container id at the beginning of hostname
+* add Container.isAlive method
+* add a module to deal with container type registration
+* add an errors module
 
 Bug fixes
 
