@@ -14,11 +14,14 @@ parser.add_option("-i", "--ctid", dest="ctid",
 parser.add_option("-H", "--hostname", dest="hostname",
                   help="find a container by its hostname")
 
+parser.add_option("-t", "--type", dest="type",
+                  help="find a container by its type")
+
 (options, args) = parser.parse_args()
 
 HOSTNAME = options.hostname
 CTID = options.ctid
-
+TYPE = options.type
 
 
 def unescape(s):
@@ -59,15 +62,7 @@ VE_SUSPENDED = 3
 
 ve = {}
 
-if HOSTNAME is None and CTID is None:
-
-    listing = os.listdir(VPS_CONF_DIR)
-    for id in [f.split('.')[0] for f in listing if re.match("^[0-9]*\.conf$",f)]:
-        if id == '0':
-            continue
-        ve[id] = getCtInfo(id)
-
-elif CTID is not None:
+if CTID is not None:
     if os.path.exists(VPS_CONF_DIR+'/'+CTID+'.conf') is True:
         ve[CTID] = getCtInfo(CTID)
     
@@ -84,6 +79,25 @@ elif HOSTNAME is not None:
             ve[id] = infos
             break
 
+elif TYPE is not None:
+    listing = os.listdir(VPS_CONF_DIR)
+    for id in [f.split('.')[0] for f in listing if re.match("^[0-9]*\.conf$",f)]:
+        
+        if id == '0':
+            continue
+        
+        infos = getCtInfo(id)
+       
+        if '"type":"' + TYPE + '"' in infos['description']:
+            ve[id] = infos
+            
+
+else:
+    listing = os.listdir(VPS_CONF_DIR)
+    for id in [f.split('.')[0] for f in listing if re.match("^[0-9]*\.conf$",f)]:
+        if id == '0':
+            continue
+        ve[id] = getCtInfo(id)
 
 
 f = open(PROCVEINFO)
