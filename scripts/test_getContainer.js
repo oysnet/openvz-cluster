@@ -10,22 +10,17 @@ var HostManager = require('../lib/hostsManager');
 ContainerTypes.register(CzAgendaApi);
 
 
+var host = new Host('10.7.35.110')
 
-var hm = new HostManager(new Host('10.7.35.110'));
-hm.register(new Host('10.7.35.110'), function() {
-	
-	hm.getContainers({
-						type : CzagendaHttpProxy.type
-					}, function(err, ctn) {
-						console.log(ctn)
-					})
-	
-			/*hm.getContainer({
-						id : 120
-					}, function(err, ctn) {
-						ctn.isAlive(function(err, alive) {
-									console.log(alive);
-								});
-					})*/
+setTimeout(function() {
 
-		});
+			var ctn = host.getContainerById(128);
+			ctn.addListener('changeAlive', function() {
+						console.log(arguments);
+					});
+
+			ctn.addListener('changeStatus', function() {
+						console.log('changeStatus', arguments);
+					});
+
+		}, 2000)

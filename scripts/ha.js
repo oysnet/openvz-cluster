@@ -1,25 +1,19 @@
-var Host = require('../lib/host').Host;
+var Host = require('../lib/host').Host,
+    Cluster = require('../lib/cluster').Cluster,
+    Redis =  require('../lib/containers/redis').Container,
+    HA = require('../lib/supervisors/ha').HA;
+    ContainerTypes = require('../lib/containerTypes'),
+    Count = require('../lib/supervisors/count').Count;
+    
+ContainerTypes.register(Redis);
 
-var CzAgendaApi = require('../lib/containers/czagendaapi').Container;
-var CzagendaHttpProxy = require('../lib/containers/czagendahttpproxy').Container;
-var Container = require('../lib/container').Container;
+var h = new Host('10.7.35.110');
+var cluster = new Cluster()
+cluster.register(h);
 
-var ContainerTypes = require('../lib/containerTypes');
-var HostManager = require('../lib/hostsManager');
-var HASupervisor = require('../lib/haSupervisor');
-
-ContainerTypes.register(CzAgendaApi);
-
-var hm = new HostManager(new Host('10.7.35.110'));
-hm.register(new Host('10.7.35.110'), function() {
-
-			var has = new HASupervisor(hm, {
-						type : CzAgendaApi.type,
-						masterIP : '10.7.51.2'
-					});
-		
-			has.start(function () {
-				console.log(arguments)
-			})	
-				
-		});
+cluster.afterInit(function() {
+  //new HA(cluster,Redis,'10.7.35.177');
+  new Count(cluster,Redis,3);
+  
+});
+ 
