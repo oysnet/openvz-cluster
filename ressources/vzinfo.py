@@ -31,7 +31,7 @@ def unescape(s):
 
 def getCtInfo(id):
     infos = {'description':'','ip':[],'hostname':'','ram':0}
-    infos['status'] = VE_STOPPED
+    infos['vmStatus'] = VE_STOPPED
     f = open(VPS_CONF_DIR+'/'+id+'.conf')
     for line in f:
       line = re.sub('#.*','',line).strip()
@@ -105,7 +105,7 @@ for line in f:
   line = re.sub('\s+',' ',line).strip().split(' ')
   if ve.has_key(line[0]):
       ve[line[0]]['ip']=line[3:]
-      ve[line[0]]['status'] = VE_RUNNING
+      ve[line[0]]['vmStatus'] = VE_RUNNING
 
 
 #ve 0 is host
@@ -116,7 +116,7 @@ for k in ve:
   v = ve[k]
   json  = '{'
   json += '"id":"%s",' % k
-  json += '"status": %s,' % v['status']
+  json += '"vmStatus": %s,' % v['vmStatus']
   json += '"ram": %s,' % v['ram']
   json += '"swap": %s,' % v['swap']
   json += '"hostname": "%s",' % v['hostname']
