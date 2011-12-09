@@ -106,14 +106,15 @@ else:
             continue
         ve[id] = getCtInfo(id)
 
-"""
+
 f = open(PROCVEINFO)
 for line in f:
   line = re.sub('\s+',' ',line).strip().split(' ')
   if ve.has_key(line[0]):
       ve[line[0]]['ip']=line[3:]
-      ve[line[0]]['vmStatus'] = VE_RUNNING
-"""
+      
+      #ve[line[0]]['vmStatus'] = VE_RUNNING
+
 
 found_ve = {}
 
@@ -121,10 +122,9 @@ p = subprocess.Popen([VZLIST,"-a"],stdout=subprocess.PIPE)
 list = p.communicate()[0].split('\n')
 for line in list[1:]:
     line = re.sub('\s+',' ',line).strip().split(' ')
+    
     if ve.has_key(line[0]):
         found_ve[line[0]] = ve[line[0]]
-        
-        
         if line[2] == 'running':
             vmStatus = VE_RUNNING
         else:
