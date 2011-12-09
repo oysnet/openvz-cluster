@@ -1,7 +1,6 @@
 #!/usr/bin/python 
 
-import os
-import re
+import os, re, subprocess
 from htmlentitydefs import name2codepoint
 from math import ceil
 from optparse import OptionParser
@@ -52,6 +51,7 @@ def getCtInfo(id):
     
     return infos
 
+VZLIST = "/usr/sbin/vzlist"
 PROCVEINFO = "/proc/vz/veinfo"
 VPS_CONF_DIR = "/etc/vz/conf/"
 
@@ -59,6 +59,13 @@ VE_STOPPED = 0
 VE_RUNNING = 1
 VE_MOUNTED = 2
 VE_SUSPENDED = 3
+
+VE_CREATED = 4
+VE_INSTALLING = 5
+VE_INSTALLED = 6
+VE_FAIL_TO_CREATE = 7
+VE_FAIL_TO_INSTALL = 8
+VE_FAIL_TO_START = 9
 
 ve = {}
 
@@ -99,14 +106,47 @@ else:
             continue
         ve[id] = getCtInfo(id)
 
-
+"""
 f = open(PROCVEINFO)
 for line in f:
   line = re.sub('\s+',' ',line).strip().split(' ')
   if ve.has_key(line[0]):
       ve[line[0]]['ip']=line[3:]
       ve[line[0]]['vmStatus'] = VE_RUNNING
+"""
 
+found_ve = {}
+
+p = subprocess.Popen([VZLIST,"-a"],stdout=subprocess.PIPE)
+list = p.communicate()[0].split('\n')
+for line in list[1:]:
+    line = re.sub('\s+',' ',line).strip().split(' ')
+    if ve.has_key(line[0]):
+        found_ve[line[0]] = ve[line[0]]
+        
+        
+        if line[2] == 'running':
+            vmStatus = VE_RUNNING
+        else:
+            vmStatus = VE_STOPPED
+        
+        test = re.search('"status":([0-9])', found_ve[line[0]]['description'])
+        if test is not None:
+            deStatus = int(test.group(1))
+            
+            if deStatus in [VE_CREATED, VE_INSTALLING]:
+                found_ve[line[0]]['vmStatus'] = deStatus
+            
+            elif vmStatus == VE_STOPPED and deStatus in [VE_FAIL_TO_CREATE, VE_FAIL_TO_INSTALL,VE_FAIL_TO_START]:
+                found_ve[line[0]]['vmStatus'] = deStatus
+                
+            else:
+                found_ve[line[0]]['vmStatus'] = vmStatus
+                
+        else:
+                found_ve[line[0]]['vmStatus'] = vmStatus
+
+ve = found_ve
 
 #ve 0 is host
 #del ve['0'] 
