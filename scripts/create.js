@@ -1,15 +1,16 @@
-var Host = require('../lib/host').Host;
+var Host = require('../lib/host').Host, Cluster = require('../lib/cluster').Cluster, Redis = require('../lib/containers/redis').Container, TestContainer = require('./testContainer').Container, HA = require('../lib/supervisors/ha').HA;
+ContainerTypes = require('../lib/containerTypes'), Count = require('../lib/supervisors/count').Count;
 
-var Czagendaapi = require('../lib/containers/czagendaapi').Container;
-var Container = require('../lib/container').Container;
-var async = require('async');
+ContainerTypes.register(TestContainer);
 
 var h = new Host('10.7.35.110');
 
-h.registerType('czagendaapi',Czagendaapi);
-
-
-var node = new Czagendaapi({hostname : 'czagendaapi-test'}, h);
-node.setup(function (err) {
-	console.log(err)
-});
+var cluster = new Cluster()
+cluster.register(h);
+cluster.afterInit(function() {
+			var container = new TestContainer({}, h);
+			
+			container.setup(function() {
+						console.log(arguments)
+					})
+		})
