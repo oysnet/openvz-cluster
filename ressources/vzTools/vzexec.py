@@ -20,8 +20,49 @@ if options.command != 'set':
     exit(1)
 
 
+def save_vm_netconfig(ifaces):
+    networking = """
+            auto lo
+            iface lo inet loopback
+            
+            """
+    route_set = False
     
-
+    sorted_ifaces = ifaces.keys()
+    sorted_ifaces.sort()
+    
+    for iface in sorted_ifaces:
+        
+        if not ifaces[iface]['permanent']:
+            continue
+        networking += """
+        
+        auto %(iface)s
+        iface %(iface)s inet static
+        broadcast %(bcast)s
+        address %(ip)s
+        netmask %(mask)s
+        """ % {
+               'iface' : iface,
+               'bcast' : ifaces[iface]['bcast'],
+               'ip' : ifaces[iface]['ip'],
+               'mask' : ifaces[iface]['mask']
+               }
+        if not route_set :
+            route_set = True
+            networking += """
+        up ip route add %(gw)s dev %(iface)s  scope link
+        up ip route add default via %(gw)s dev %(iface)s
+        """ % {
+             'gw' : getGw(),
+             'iface': iface
+             }
+        
+        networking += "\n"
+    
+    p = subprocess.call(['vzctl','exec2',options.ctid,'echo "%s"' % networking,'>/etc/network/interfaces'])
+    p = subprocess.call(['vzctl','exec2',options.ctid,'/etc/init.d/networking restart'])
+    
 if options.ipadd is not None:
     ifaces = getCtVethIp(options.ctid)
     ip = options.ipadd.split('/')[0]
@@ -38,7 +79,9 @@ if options.ipadd is not None:
     if iface is None:
         print "Can't find iface"    
         exit(1)
+
     if options.save:
+        p = subprocess.call(['vzctl','set',options.ctid,'--netif_add',iface,'--save'])
         p = subprocess.call(['vzctl','set',options.ctid,'--netif_add',iface,'--save'])
         
         #add ip on ifaces ipcalc.Network('10.7.50.0/255.255.255.0').broadcast()
@@ -51,74 +94,47 @@ if options.ipadd is not None:
         if ifaces[iface]['bcast'] == ip:
             ifaces[iface]['bcast'] = '0.0.0.0'
         
-        networking = """
-            #ok
-            auto lo
-            iface lo inet loopback
-            
-            """
-        route_set = False
-        for iface in ifaces:
-            print ifaces[iface]
-            if not ifaces[iface]['permanent']:
-                continue
-            networking += """
-            
-            auto %(iface)s
-            iface %(iface)s inet static
-            broadcast %(bcast)s
-            address %(ip)s
-            netmask %(mask)s
-            """ % {
-                   'iface' : iface,
-                   'bcast' : ifaces[iface]['bcast'],
-                   'ip' : ifaces[iface]['ip'],
-                   'mask' : ifaces[iface]['mask']
-                   }
-            if not route_set :
-                route_set = True
-                networking += """
-            up ip route add %(gw)s dev %(iface)s  scope link
-            up ip route add default via %(gw)s dev %(iface)s
-            """ % {
-                 'gw' : getGw(),
-                 'iface': iface
-                 }
-            
-            networking += "\n"
+        
         p = subprocess.call(['ifconfig','veth%s.%s' % (options.ctid,n)])
         p = subprocess.call(['echo','1','> /proc/sys/net/ipv4/conf/veth%s.%s/forwarding' % (options.ctid,n)])
         p = subprocess.call(['echo','1','> /proc/sys/net/ipv4/conf/veth%s.%s/proxy_arp' %  (options.ctid,n)])
-        p = subprocess.call(['vzctl','exec2',options.ctid,'echo "%s"' % networking,'>/etc/network/interfaces'])
-        p = subprocess.call(['vzctl','exec2',options.ctid,'/etc/init.d/networking restart'])
-        p = subprocess.call(['ip','route','flush','cache'])
-        p = subprocess.call(['arp','-d',ip])
+        save_vm_netconfig(ifaces)
+       
 
             
             
     else:
         p = subprocess.call(['vzctl','set',options.ctid,'--netif_add',iface])
         p = subprocess.call(['vzctl','exec2',options.ctid,'ifconfig',iface,'%s/%s' % (ip,netmask)])
-    
-
+        
+        
+    p = subprocess.call(['ip','route','flush','cache'])
+    p = subprocess.call(['arp','-d',ip])
+        
 if options.ipdel is not None:
     ifaces = getCtVethIp(options.ctid)
     ip = options.ipdel.split('/')[0]
-    netmask = '32' if len(options.ipdel.split('/')) == 1 else options.ipdel.split('/')[1] 
+    #netmask = '32' if len(options.ipdel.split('/')) == 1 else options.ipdel.split('/')[1] 
     
     iface = None    
     for n in range(0,10):
         if ifaces.has_key('eth%s' % n) and ifaces['eth%s' % n]['ip'] == ip:
             iface = 'eth%s' % n
     
+    del ifaces[iface]
+    
     if iface is None:
         print "Can't find iface"    
         exit(1)
 
     if options.save:        
-        p = subprocess.call(['vzctl','set',options.ctid,'--netif_del',iface])    
-        p = subprocess.call(['ip','route','flush','cache'])
-    else:
         p = subprocess.call(['vzctl','set',options.ctid,'--netif_del',iface,'--save'])    
-        p = subprocess.call(['ip','route','flush','cache'])
-
+        #p = subprocess.call(['ip','route','flush','cache'])
+        save_vm_netconfig(ifaces)
+        
+    else:
+        p = subprocess.call(['vzctl','set',options.ctid,'--netif_del',iface])    
+        #p = subprocess.call(['ip','route','flush','cache'])
+    
+    p = subprocess.call(['ip','route','flush','cache'])
+    p = subprocess.call(['arp','-d',ip])
