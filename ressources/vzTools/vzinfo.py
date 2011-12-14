@@ -4,6 +4,7 @@ import os, re, subprocess
 from htmlentitydefs import name2codepoint
 from math import ceil
 from optparse import OptionParser
+import pickle
 
 parser = OptionParser()
 parser.add_option("-i", "--ctid", dest="ctid",
@@ -28,9 +29,36 @@ def unescape(s):
               lambda m: unichr(name2codepoint[m.group(1)]), s)
 
 
+
+def getCtIp(id):
+    """
+    try:
+        os.mkdir('/root/.vzcache/')
+    except Exception, e:
+        pass
+    if os.path.isfile('/root/.vzcache/%s_ip.pickle' % id):
+        ifaces = pickle.load(open('/root/.vzcache/%s_ip.pickle' %id,'r'));
+    else:
+    """
+    p = subprocess.Popen(['vzctl','exec2',id,'ifconfig'],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    list = p.communicate()[0].split('\n')
+    ifaces = {}
+    iface = None
+    for line in list:
+        match = re.search('^([^ ]+) ', line)
+        if match != None and match.group(1) != 'lo':
+            iface = match.group(1)
+        match = re.search('inet addr:([0-9\.]+)', line)
+        if match != None and iface != None:
+            ifaces[iface]=match.group(1)
+            iface=None
+    #    pickle.dump(ifaces, open('/root/.vzcache/%s_ip.pickle' %id,'w'));
+    return ifaces
+
 def getCtInfo(id):
     infos = {'description':'','ip':[],'hostname':'','ram':0}
     infos['vmStatus'] = VE_STOPPED
+    infos['ips'] = getCtIp(id)
     f = open(VPS_CONF_DIR+'/'+id+'.conf')
     for line in f:
       line = re.sub('#.*','',line).strip()
@@ -161,9 +189,15 @@ for k in ve:
   json += '"swap": %s,' % v['swap']
   json += '"hostname": "%s",' % v['hostname']
   json += '"description": "%s",' % v['description'].replace('"','\\"')
+  v['ip'].extend([v['ips'][iface] for iface in v['ips']])
   json += '"ip": [%s]' % ",".join([ '"%s"' % ip for ip in v['ip']])
+  
+#  v['ip'].extend([v['ips'][iface] for iface in v['ips']])
+#  json += '"ip": [%s]' % ",".join([ '"%s"' % ip for ip in v['ip'])])
+#  json += '"ips": [%s]' % ",".join([ '{"%s":"%s"}' % (iface,v['ips'][iface]) for iface in v['ips']])
   json += '}'
   ve_json.append(json)
 
 print "[%s]" % ",".join(ve_json)
+
 
