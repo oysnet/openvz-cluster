@@ -17,6 +17,10 @@ Features
 * add Container.isAlive method
 * add a module to deal with container type registration
 * add an errors module
+* add new status CREATED INSTALLING INSTALLED FAIL_TO_CREATE FAIL_TO_INSTALL FAIL_TO_START
+* delay addContainer event when container has no type, take care of that on Host.afterInit
+* add Count supervisor
+* add HA supervisor
 
 Bug fixes
 
