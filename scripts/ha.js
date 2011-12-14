@@ -3,7 +3,7 @@ ContainerTypes = require('../lib/containerTypes'), Count = require('../lib/super
 
 var CzagendaHttpProxy = require('../lib/containers/czagendahttpproxy').Container;
 
-ContainerTypes.register(CzagendaHttpProxy);
+ContainerTypes.register(TestContainer);
 
 var h = new Host('10.7.35.110');
 
@@ -13,7 +13,7 @@ var h = new Host('10.7.35.110');
   cluster.register(h);
   
   cluster.afterInit(function() { 
-  new HA(cluster,CzagendaHttpProxy,'10.7.35.180');
-  //new Count(cluster,TestContainer,2, true);
+  //new HA(cluster,CzagendaHttpProxy,'10.7.35.180');
+  new Count(cluster,TestContainer,1, true);
   
   });
