@@ -13,7 +13,7 @@ var h = new Host('10.7.35.110');
   cluster.register(h);
   
   cluster.afterInit(function() { 
-  //new HA(cluster,CzagendaHttpProxy,'10.7.35.180');
+  //new HA(cluster,TestContainer,'10.7.35.181');
   new Count(cluster,TestContainer,1, true);
   
   });

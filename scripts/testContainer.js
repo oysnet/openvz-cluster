@@ -5,7 +5,7 @@ var util = require('util'),
 
 var TestContainer = function TestContainer() {
   Container.apply(this,Array.prototype.slice.call(arguments));
-  
+  this.network = Container.NETWORK.VETH;
 };
 util.inherits(TestContainer, Container);
 
