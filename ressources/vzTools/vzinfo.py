@@ -58,7 +58,8 @@ def getCtIp(id):
 def getCtInfo(id):
     infos = {'description':'','ip':[],'hostname':'','ram':0}
     infos['vmStatus'] = VE_STOPPED
-    infos['ips'] = getCtIp(id)
+    #infos['ips'] = getCtIp(id)
+    
     f = open(VPS_CONF_DIR+'/'+id+'.conf')
     for line in f:
       line = re.sub('#.*','',line).strip()
@@ -74,7 +75,9 @@ def getCtInfo(id):
           privvmpages = int(ceil(int(value.split(':')[0])/256.0))
         elif key == 'LOCKEDPAGES':
           infos['ram'] = int(ceil(int(value.split(':')[0])/256.0))
-        
+        elif key == 'IP_ADDRESS':
+            infos['ip'] = re.sub('\s+',' ',value).strip().split(' ')
+            
     infos['swap'] = privvmpages - infos['ram']
     
     return infos
@@ -134,7 +137,7 @@ else:
             continue
         ve[id] = getCtInfo(id)
 
-
+"""
 f = open(PROCVEINFO)
 for line in f:
   line = re.sub('\s+',' ',line).strip().split(' ')
@@ -142,7 +145,7 @@ for line in f:
       ve[line[0]]['ip']=line[3:]
       
       #ve[line[0]]['vmStatus'] = VE_RUNNING
-
+"""
 
 found_ve = {}
 
@@ -189,7 +192,12 @@ for k in ve:
   json += '"swap": %s,' % v['swap']
   json += '"hostname": "%s",' % v['hostname']
   json += '"description": "%s",' % v['description'].replace('"','\\"')
-  v['ip'].extend([v['ips'][iface] for iface in v['ips']])
+  
+  if v['vmStatus'] == VE_RUNNING:
+      ips = getCtIp(k)
+      v['ip'] = [ips[iface] for iface in ips]
+  
+  #v['ip'].extend([v['ips'][iface] for iface in v['ips']])
   json += '"ip": [%s]' % ",".join([ '"%s"' % ip for ip in v['ip']])
   
 #  v['ip'].extend([v['ips'][iface] for iface in v['ips']])
