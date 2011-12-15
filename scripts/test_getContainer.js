@@ -18,9 +18,29 @@ var h = new Host('10.7.35.110');
   cluster.register(h);
   
   cluster.afterInit(function() { 
-  	var containers = cluster.getContainersByType(CzagendaHttpProxy);
-		console.log(containers[0].id)
-  
+  	var container = cluster.getContainerById(217);
+		
+  	container.on('changeStatus',function (status) {
+  		console.log('changeStatus', status)
+  	})
+  	
+  	container.on('changeVmStatus',function (status) {
+  		console.log('changeVmStatus', status)
+  	})
+  	
+  	console.log('Container 217', container.status, container.vmStatus)
+  	
+  	setTimeout(function () {
+  		console.log('set vmStatus 5')
+  		container.refreshInfo({vmStatus : 5});
+  		
+  		setTimeout(function () {
+  		console.log('set vmStatus 1')
+  		container.refreshInfo({vmStatus : 1});
+  	}, 5000)
+  		
+  	}, 5000)
+  	
   });
 
 

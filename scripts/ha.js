@@ -14,6 +14,6 @@ var h = new Host('10.7.35.110');
   
   cluster.afterInit(function() { 
   new HA(cluster,TestContainer,'10.7.35.181');
-  new Count(cluster,TestContainer,3, false);
+  new Count(cluster,TestContainer,1, false);
   
   });
