@@ -9,7 +9,7 @@ util.inherits(TestContainer, Container);
 TestContainer.prototype.getSetupTasks = function() {
 	return [function(callback) {
 				log.info('Install TestContainer');
-				this.exec(['sleep 20'].join(' && '), null, function(err, res) {
+				this.exec(['sleep 120'].join(' && '), null, function(err, res) {
 							if (err) {
 								log
 										.warning(
