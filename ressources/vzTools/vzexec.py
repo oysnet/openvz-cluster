@@ -66,7 +66,7 @@ def save_vm_netconfig(ifaces):
 if options.ipadd is not None:
     ifaces = getCtVethIp(options.ctid)
     ip = options.ipadd.split('/')[0]
-    netmask = '32' if len(options.ipadd.split('/')) == 1 else options.ipadd.split('/')[1] 
+    netmask = '24' if len(options.ipadd.split('/')) == 1 else options.ipadd.split('/')[1] 
         
     iface = None    
     for n in range(0,10):
@@ -114,7 +114,6 @@ if options.ipadd is not None:
 if options.ipdel is not None:
     ifaces = getCtVethIp(options.ctid)
     ip = options.ipdel.split('/')[0]
-    #netmask = '32' if len(options.ipdel.split('/')) == 1 else options.ipdel.split('/')[1] 
     
     iface = None    
     for n in range(0,10):
