@@ -195,7 +195,9 @@ for k in ve:
   
   if v['vmStatus'] == VE_RUNNING:
       ips = getCtIp(k)
-      v['ip'] = [ips[iface] for iface in ips]
+      sort_ifaces = ips.keys()
+      sort_ifaces.sort()
+      v['ip'] = [ips[iface] for iface in sort_ifaces]
   
   #v['ip'].extend([v['ips'][iface] for iface in v['ips']])
   json += '"ip": [%s]' % ",".join([ '"%s"' % ip for ip in v['ip']])
