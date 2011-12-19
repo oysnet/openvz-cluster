@@ -1,0 +1,14 @@
+{
+  "name": "czagenda-cluster",
+  "description": "Proxmox cluster manager",
+  "version": "0.0.1",
+  "homepage": "http://czagenda.org",
+  "repository": "git@git.oxys.net:czagenda-cluster",
+  "main": "index",
+  "dependencies": {
+      "async": "= 0.1.15",
+      "czagenda-log": ">= 0.0.1",
+      "control" : "= 0.2.2"
+  },
+  "engines": { "node": "*" }
+}
