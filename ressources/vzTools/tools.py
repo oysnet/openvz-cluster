@@ -21,11 +21,10 @@ def getCtVethIp(id):
             ifaces[iface]={'ip':match_ip.group(1),'bcast':match_bcast.group(1),'mask':match_mask.group(1),'permanent' : ('address %s' % match_ip.group(1) in config != None)}
             iface=None
             
-    
-            
-    #    pickle.dump(ifaces, open('/root/.vzcache/%s_ip.pickle' %id,'w'));
     return ifaces
 
 
 def getGw(): 
-    return '10.7.35.254'
+    f = open('/etc/network/interfaces', 'r')
+    config = f.read()
+    return re.search('gateway\s+([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})', config).group(1)
