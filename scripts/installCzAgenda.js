@@ -17,6 +17,10 @@ ContainerTypes.register(CzagendaRedis);
 var h = new Host('10.7.35.110');
 
 var cluster = new Cluster();
+
+cluster.defaultNetworkAddress = '10.7.35.0';
+cluster.nameServerAddress = '10.7.35.254';
+
 cluster.register(h);
 
 cluster.afterInit(function() {
@@ -27,7 +31,7 @@ cluster.afterInit(function() {
 			methods.push(function(callback) {
 						var ctn = new CzagendaRedis({}, h);
 						ctn.setup(function () {
-							ctn.addIp( '10.7.100.3',false ,callback)
+							ctn.addIp( '10.7.35.201',false ,callback)
 						});
 					})
 					
@@ -35,7 +39,7 @@ cluster.afterInit(function() {
 			methods.push(function(callback) {
 						var ctn = new CzagendaElasticSearch({}, h);
 						ctn.setup(function () {
-							ctn.addIp( '10.7.100.2',false ,callback)
+							ctn.addIp( '10.7.35.202',false ,callback)
 						});
 					})
 					
