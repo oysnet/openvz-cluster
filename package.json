@@ -1,9 +1,9 @@
 {
-  "name": "czagenda-cluster",
-  "description": "Proxmox cluster manager",
+  "name": "openvz-cluster",
+  "description": "Openvz cluster manager",
   "version": "0.0.1",
-  "homepage": "http://czagenda.org",
-  "repository": "git@git.oxys.net:czagenda-cluster",
+  "homepage": "http://www.oxys.net",
+  "repository": "git@github.com:oxys-net/openvz-cluster.git",
   "main": "index",
   "dependencies": {
       "async": "= 0.1.15",
